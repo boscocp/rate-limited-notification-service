@@ -72,16 +72,17 @@ class UsersDomain:
         notification_values = self._get_or_create_notification_values(
             email, type, time_rule["limit"]
         )
-        difference = self._get_time_diference(notification_values["last_notification"])
+        difference = self._get_time_difference(notification_values["last_notification"])
         if notification_values["notification_limit"] > 0:
+            # Simulate sending the email
+            print(f"Send to {email}: {message}")
             notification_values["notification_limit"] -= 1
             return self.__repository.create_or_replace_user_registry(
                 notification_values
             )
-        if (
-            notification_values["notification_limit"] <= 0
-            and difference.total_seconds() > time_rule["time"]
-        ):
+        elif difference.total_seconds() > time_rule["time"]:
+            # Simulate sending the email
+            print(f"Send to {email}: {message}")
             notification_values["last_notification"] = datetime.now().strftime(
                 "%Y-%m-%d %H:%M:%S.%f"
             )
@@ -89,15 +90,14 @@ class UsersDomain:
             return self.__repository.create_or_replace_user_registry(
                 notification_values
             )
-        response = Response(
-            content=f"Wait more {time_rule["time"] - difference.seconds} seconds to notify",
-            status_code=429,
-        )
-        # simulate redirect email
-        print(f"Send to {email}: {message}")
-        return response
+        else:
+            # Too soon to notify
+            return Response(
+                content=f"Wait more {time_rule['time'] - difference.seconds} seconds to notify",
+                status_code=429,
+            )
 
-    def _get_time_diference(self, time):
+    def _get_time_difference(self, time):
 
         date_time = datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f")
         now = datetime.now()
