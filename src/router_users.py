@@ -26,7 +26,7 @@ class UsersRouter:
 
         @api_router.post("/notify")
         def notify(item: Item):
-            return self.__users_domain.notify_user(item.email, item.type)
+            return self.__users_domain.notify_user(item.email, item.type, item.message)
 
         @api_router.get("/get/{email}/{type}")
         def get_user(email: str, type: str):

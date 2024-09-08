@@ -16,7 +16,8 @@ And then: POST - http://localhost:5000/users/notify
 ```
 {
   "email":"bosco@gmail.com",
-  "type": "news"
+  "type": "news",
+  "message": "Hello World!"
 }
 ```
 
