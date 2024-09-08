@@ -13,16 +13,19 @@ class HeathCheck(BaseModel):
 
     status: str = "OK"
 
+
 class Item(BaseModel):
     type: str
     email: str
     message: str | None = None
 
+
 class UsersModel(BaseModel):
     type: Optional[str] = None
-    email: str = Field(..., example='bosco@gmail.com')
-    last_notification: Optional[str] = Field(..., example='2024-09-07 17:43:22.095267')
+    email: str = Field(..., example="bosco@gmail.com")
+    last_notification: Optional[str] = Field(..., example="2024-09-07 17:43:22.095267")
     notification_limit: Optional[int] = Field(..., example=2)
+
 
 class TimeRuleModel(BaseModel):
     type: Optional[str] = None
@@ -30,7 +33,7 @@ class TimeRuleModel(BaseModel):
     limit: int = Field(..., example=2)
 
 
-class UsersDomain():
+class UsersDomain:
     def __init__(self, repository: UserRepository) -> None:
         self.__repository = repository
 
@@ -42,7 +45,7 @@ class UsersDomain():
 
     def create_user_registry(self, user: UsersModel):
         return self.__repository.create_or_replace_user_registry(user.model_dump())
-    
+
     def notify_user(self, email: str, type: str, message: str = None):
         """
         Notifies a user via email based on specified rules.
@@ -66,26 +69,36 @@ class UsersDomain():
         - Simulates redirecting the email by printing the recipient and message (if provided).
         """
         time_rule = self._get_time_rule(type)
-        notification_values = self._get_or_create_notification_values(email, type, time_rule["limit"])
+        notification_values = self._get_or_create_notification_values(
+            email, type, time_rule["limit"]
+        )
         difference = self._get_time_diference(notification_values["last_notification"])
         if notification_values["notification_limit"] > 0:
             notification_values["notification_limit"] -= 1
-            return self.__repository.create_or_replace_user_registry(notification_values)
-        if notification_values["notification_limit"] <= 0 and difference.total_seconds() > time_rule["time"]:
-            notification_values["last_notification"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+            return self.__repository.create_or_replace_user_registry(
+                notification_values
+            )
+        if (
+            notification_values["notification_limit"] <= 0
+            and difference.total_seconds() > time_rule["time"]
+        ):
+            notification_values["last_notification"] = datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S.%f"
+            )
             notification_values["notification_limit"] = time_rule["limit"]
-            return self.__repository.create_or_replace_user_registry(notification_values)
+            return self.__repository.create_or_replace_user_registry(
+                notification_values
+            )
         response = Response(
-            content= f"Wait more {time_rule["time"] - difference.seconds} seconds to notify", 
-            status_code=429
+            content=f"Wait more {time_rule["time"] - difference.seconds} seconds to notify",
+            status_code=429,
         )
         # simulate redirect email
         print(f"Send to {email}: {message}")
         return response
 
-
     def _get_time_diference(self, time):
-        
+
         date_time = datetime.strptime(time, "%Y-%m-%d %H:%M:%S.%f")
         now = datetime.now()
         difference = now - date_time
@@ -104,17 +117,17 @@ class UsersDomain():
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
 
             notification_values = {
-                "type":type, 
-                "email":email, 
-                "last_notification":now, 
-                "notification_limit":limit
+                "type": type,
+                "email": email,
+                "last_notification": now,
+                "notification_limit": limit,
             }
             self.__repository.create_or_replace_user_registry(notification_values)
 
         return notification_values
 
-    
-class TimeRuleDomain():
+
+class TimeRuleDomain:
     def __init__(self, repository: TimeRuleRepository) -> None:
         self.__repository = repository
 

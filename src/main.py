@@ -32,9 +32,12 @@ app.include_router(users_router.router)
 app.include_router(time_rule_router.router)
 
 generate_table()
-@app.get('/')
+
+
+@app.get("/")
 def index():
-    return 'Hello World!'
+    return "Hello World!"
+
 
 @app.get(
     "/health",
