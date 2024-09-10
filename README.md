@@ -52,6 +52,6 @@ on macOS or linux: `source venv/bin/activate`
 
 `pip install -r requirements.txt`
 
-# Env configuration
+# Tests
 To execute tests...
 `python -m pytest -s`
